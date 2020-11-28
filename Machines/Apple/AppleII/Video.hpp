@@ -14,6 +14,7 @@
 #include "../../../ClockReceiver/DeferredQueue.hpp"
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 namespace Apple {
