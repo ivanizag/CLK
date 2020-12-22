@@ -651,11 +651,9 @@ int main(int argc, char *argv[]) {
 	//	/usr/local/share/CLK/[system];
 	//	/usr/share/CLK/[system]; or
 	//	[user-supplied path]/[system]
-	std::vector<ROMMachine::ROM> requested_roms;
-	ROMMachine::ROMFetcher rom_fetcher = [&requested_roms, &arguments]
+	std::vector<ROMMachine::ROM> missing_roms;
+	ROMMachine::ROMFetcher rom_fetcher = [&missing_roms, &arguments]
 		(const std::vector<ROMMachine::ROM> &roms) -> std::vector<std::unique_ptr<std::vector<uint8_t>>> {
-			requested_roms.insert(requested_roms.end(), roms.begin(), roms.end());
-
 			std::vector<std::string> paths = {
 				"/usr/local/share/CLK/",
 				"/usr/share/CLK/"
@@ -681,6 +679,7 @@ int main(int argc, char *argv[]) {
 
 				if(!file) {
 					results.emplace_back(nullptr);
+					missing_roms.push_back(rom);
 					continue;
 				}
 
@@ -718,7 +717,7 @@ int main(int argc, char *argv[]) {
 			case ::Machine::Error::MissingROM:
 				std::cerr << "Could not find system ROMs; please install to /usr/local/share/CLK/ or /usr/share/CLK/, or provide a --rompath." << std::endl;
 				std::cerr << "One or more of the following was needed but not found:" << std::endl;
-				for(const auto &rom: requested_roms) {
+				for(const auto &rom: missing_roms) {
 					std::cerr << rom.machine_name << '/' << rom.file_name << " (";
 					if(!rom.descriptive_name.empty()) {
 						std::cerr << rom.descriptive_name << "; ";
